@@ -1,0 +1,48 @@
+// For format details, see https://aka.ms/vscode-remote/devcontainer.json or this file's README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.122.1/containers/docker-existing-dockerfile
+{
+    "name": "${containerWorkspaceFolderBasename}",
+    "context": ".",
+    "dockerFile": "Dockerfile",
+    "mounts": [
+        // docker from docker
+        "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+    ],
+    // 이 프로젝트에서 실행하는 모든 컨테이너는 같은 network에 있어야 한다
+    "initializeCommand": "docker network create ${containerWorkspaceFolderBasename} || true",
+    "runArgs": [
+        "--network",
+        "${containerWorkspaceFolderBasename}",
+        "--name",
+        "${containerWorkspaceFolderBasename}-vscode"
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-azuretools.vscode-docker",
+                "ms-vscode.live-server",
+                "mutantdino.resourcemonitor",
+                "foxundermoon.shell-format"
+            ],
+            "settings": {
+                "livePreview.portNumber": 3030,
+                "remote.downloadExtensionsLocally": true,
+                "[dockerfile]": {
+                    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+                },
+                "[jsonc]": {
+                    "editor.defaultFormatter": "vscode.json-language-features"
+                },
+                "[dotenv]": {
+                    "editor.defaultFormatter": "foxundermoon.shell-format"
+                },
+                "[shellscript]": {
+                    "editor.defaultFormatter": "foxundermoon.shell-format"
+                },
+                "[ignore]": {
+                    "editor.defaultFormatter": "foxundermoon.shell-format"
+                }
+            }
+        }
+    }
+}

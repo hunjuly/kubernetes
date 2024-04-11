@@ -8,11 +8,9 @@
         // docker from docker
         "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
     ],
-    // 이 프로젝트에서 실행하는 모든 컨테이너는 같은 network에 있어야 한다
-    "initializeCommand": "docker network create ${containerWorkspaceFolderBasename} || true",
     "runArgs": [
         "--network",
-        "${containerWorkspaceFolderBasename}",
+        "host",
         "--name",
         "${containerWorkspaceFolderBasename}-vscode"
     ],
@@ -20,12 +18,10 @@
         "vscode": {
             "extensions": [
                 "ms-azuretools.vscode-docker",
-                "ms-vscode.live-server",
                 "mutantdino.resourcemonitor",
                 "foxundermoon.shell-format"
             ],
             "settings": {
-                "livePreview.portNumber": 3030,
                 "remote.downloadExtensionsLocally": true,
                 "[dockerfile]": {
                     "editor.defaultFormatter": "ms-azuretools.vscode-docker"

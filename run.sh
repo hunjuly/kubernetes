@@ -1,28 +1,42 @@
 #!/bin/bash
+
+check_minikube_ip() {
+    local MINIKUBE_IP=$(minikube ip)
+
+    if [[ "$MINIKUBE_IP" != 192.168.49.* ]]; then
+        echo "Minikube IP ($MINIKUBE_IP) is not within the expected range (192.168.49.x). Exiting..."
+        exit 1
+    fi
+
+    echo "Minikube IP is within the expected range: $MINIKUBE_IP"
+}
+
+
 set -ex
 cd "$(dirname "$0")"
 
 clear
+docker build -t node-server:2 ./server
+
 minikube delete --all
-minikube start --force --addons=ingress
-kubectl cluster-info dump
-kubectl get nodes
+minikube start --force --nodes 1 --addons=ingress --addons=metallb
 
-kubectl apply -f server-deploy.yaml
-kubectl rollout status deployments/node-server
+check_minikube_ip
 
-kubectl apply -f server-svc.yaml
-sleep 2
-curl -d Hello $(minikube ip):30000
+minikube image load node-server:2
 
-kubectl apply -f server-ingress.yaml
-sleep 2
-curl -d Hello $(minikube ip)
+kubectl apply -f config.yaml
+kubectl apply -f secret.yaml
 
-# 에러 발생하면 로그 확인
-# export POD_NAME=$(kubectl get pods -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
-# kubectl wait --for=condition=Ready pod/$POD_NAME
-# kubectl wait --for=condition=ready pod -l app=node-server
-# kubectl logs $POD_NAME
-# kubectl get deployments
-# kubectl get pods
+kubectl apply -f redis.yaml
+
+kubectl apply -f metallb-config.yaml
+kubectl apply -f server-app.yaml
+
+kubectl wait --for=condition=ready pod -l app=MyApp
+kubectl logs -l app=MyApp
+
+curl -d Hello http://192.168.49.100:4000
+
+# redis 설정
+# psql 설정

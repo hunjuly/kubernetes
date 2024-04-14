@@ -11,7 +11,6 @@ check_minikube_ip() {
     echo "Minikube IP is within the expected range: $MINIKUBE_IP"
 }
 
-
 set -ex
 cd "$(dirname "$0")"
 
@@ -19,24 +18,23 @@ clear
 docker build -t node-server:2 ./server
 
 minikube delete --all
-minikube start --force --nodes 1 --addons=ingress --addons=metallb
+minikube start --force \
+    --cpus=no-limit \
+    --memory=no-limit \
+    --disk-size='20000g' \
+    --nodes 1 \
+    --addons=ingress \
+    --addons=metallb
 
 check_minikube_ip
 
 minikube image load node-server:2
 
-kubectl apply -f config.yaml
-kubectl apply -f secret.yaml
-
+kubectl apply -f metallb.yaml
 kubectl apply -f redis.yaml
+kubectl apply -f app.yaml
 
-kubectl apply -f metallb-config.yaml
-kubectl apply -f server-app.yaml
-
+kubectl wait --for=condition=ready pod -l app=redis
 kubectl wait --for=condition=ready pod -l app=MyApp
-kubectl logs -l app=MyApp
 
-curl -d Hello http://192.168.49.100:4000
-
-# redis 설정
-# psql 설정
+curl http://192.168.49.100:4000/redis

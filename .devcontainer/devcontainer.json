@@ -19,7 +19,8 @@
             "extensions": [
                 "ms-azuretools.vscode-docker",
                 "mutantdino.resourcemonitor",
-                "foxundermoon.shell-format"
+                "foxundermoon.shell-format",
+                "redhat.vscode-yaml"
             ],
             "settings": {
                 "remote.downloadExtensionsLocally": true,

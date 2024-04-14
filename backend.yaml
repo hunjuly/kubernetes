@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: app-config
+  name: backend-config
 data:
   redis-host: "redis-service"
   psql-host: "postgres-service"
@@ -9,25 +9,25 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-app
+  name: backend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: MyApp
+      app: backend
   template:
     metadata:
       labels:
-        app: MyApp
+        app: backend
     spec:
       containers:
-        - name: my-container
+        - name: backend-container
           image: node-server:2
           ports:
             - containerPort: 3000
           envFrom:
             - configMapRef:
-                name: app-config
+                name: backend-config
             - configMapRef:
                 name: psql-config
           env:
@@ -36,16 +36,35 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: postgres-password
+          resources:
+            limits:
+              cpu: 500m # 최대 0.5core
+            requests:
+              cpu: 200m # 최소 0.2core 가능해야 함
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: my-service
+  name: backend-service
 spec:
   type: LoadBalancer
   selector:
-    app: MyApp
+    app: backend
   ports:
     - protocol: TCP
       port: 4000
       targetPort: 3000
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: backend-hpa
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 50

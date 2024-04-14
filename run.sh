@@ -25,6 +25,7 @@ minikube start --force \
     --nodes 1 \
     --addons=ingress \
     --addons=metallb \
+    --addons=metrics-server \
     --mount=true \
     --mount-string="$HOST_PATH:/host-data"
 
@@ -35,11 +36,14 @@ minikube image load node-server:2
 kubectl apply -f metallb.yaml
 kubectl apply -f psql.yaml
 kubectl apply -f redis.yaml
-kubectl apply -f app.yaml
+kubectl apply -f backend.yaml
 
 kubectl wait --for=condition=ready --timeout=60s pod -l app=postgres
 kubectl wait --for=condition=ready --timeout=60s pod -l app=redis
-kubectl wait --for=condition=ready --timeout=60s pod -l app=MyApp
+kubectl wait --for=condition=ready --timeout=60s pod -l app=backend
 
 curl http://192.168.49.100:4000/redis
 curl http://192.168.49.100:4000/psql
+
+# kubectl get hpa -w
+# ab -n 1000000 -c 500 http://192.168.49.100:4000/redis

@@ -24,17 +24,22 @@ minikube start --force \
     --disk-size='20000g' \
     --nodes 1 \
     --addons=ingress \
-    --addons=metallb
+    --addons=metallb \
+    --mount=true \
+    --mount-string="$HOST_PATH:/host-data"
 
 check_minikube_ip
 
 minikube image load node-server:2
 
 kubectl apply -f metallb.yaml
+kubectl apply -f psql.yaml
 kubectl apply -f redis.yaml
 kubectl apply -f app.yaml
 
-kubectl wait --for=condition=ready pod -l app=redis
-kubectl wait --for=condition=ready pod -l app=MyApp
+kubectl wait --for=condition=ready --timeout=60s pod -l app=postgres
+kubectl wait --for=condition=ready --timeout=60s pod -l app=redis
+kubectl wait --for=condition=ready --timeout=60s pod -l app=MyApp
 
 curl http://192.168.49.100:4000/redis
+curl http://192.168.49.100:4000/psql

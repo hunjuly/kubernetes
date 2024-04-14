@@ -1,3 +1,6 @@
+# 설정 참고
+# https://kubernetes.io/docs/tutorials/stateless-application/guestbook/
+
 apiVersion: v1
 kind: ConfigMap
 metadata:

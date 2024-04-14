@@ -4,15 +4,7 @@ metadata:
   name: app-config
 data:
   redis-host: "redis-service"
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: app-secret
-type: Opaque
-data:
-  username: cHJvZHVzZXI= # 'produser'를 base64로 인코딩
-  password: cHJvZHNlY3JldA== # 'prodsecret'를 base64로 인코딩
+  psql-host: "postgres-service"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -36,17 +28,14 @@ spec:
           envFrom:
             - configMapRef:
                 name: app-config
+            - configMapRef:
+                name: psql-config
           env:
-            - name: USERNAME
+            - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: app-secret
-                  key: username
-            - name: PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: app-secret
-                  key: password
+                  name: postgres-secret
+                  key: postgres-password
 ---
 apiVersion: v1
 kind: Service

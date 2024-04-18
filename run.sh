@@ -10,9 +10,9 @@ sudo chmod -R 777 /microk8s/volume
 microk8s kubectl delete all --all
 
 docker build -t node-server:2 ./server
-docker save node-server:2 -o node-server_2.tar
-microk8s ctr image import node-server_2.tar
-rm node-server_2.tar
+docker save node-server:2 -o node-server.tar
+sudo microk8s images import < node-server.tar
+rm node-server.tar
 
 microk8s kubectl apply -f config.yaml
 microk8s kubectl apply -f metallb.yaml

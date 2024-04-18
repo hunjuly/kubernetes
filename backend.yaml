@@ -36,11 +36,31 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: postgres-password
+          volumeMounts:
+            - name: backend-persistent-storage
+              mountPath: /storage
           resources:
             limits:
               cpu: 500m # 최대 0.5core
             requests:
               cpu: 200m # 최소 0.2core 가능해야 함
+      volumes:
+        - name: backend-persistent-storage
+          persistentVolumeClaim:
+            claimName: backend-pv-claim
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backend-pv-claim
+spec:
+  storageClassName: ssd-hostpath
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
 ---
 apiVersion: v1
 kind: Service

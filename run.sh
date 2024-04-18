@@ -1,49 +1,30 @@
 #!/bin/bash
-
-check_minikube_ip() {
-    local MINIKUBE_IP=$(minikube ip)
-
-    if [[ "$MINIKUBE_IP" != 192.168.49.* ]]; then
-        echo "Minikube IP ($MINIKUBE_IP) is not within the expected range (192.168.49.x). Exiting..."
-        exit 1
-    fi
-
-    echo "Minikube IP is within the expected range: $MINIKUBE_IP"
-}
-
 set -ex
 cd "$(dirname "$0")"
 
 clear
+
+sudo mkdir -p /microk8s/volume
+sudo chmod -R 777 /microk8s/volume
+
+microk8s kubectl delete all --all
+
 docker build -t node-server:2 ./server
+docker save node-server:2 -o node-server_2.tar
+microk8s ctr image import node-server_2.tar
+rm node-server_2.tar
 
-minikube delete --all
-minikube start --force \
-    --cpus=no-limit \
-    --memory=no-limit \
-    --disk-size='20000g' \
-    --nodes 1 \
-    --addons=ingress \
-    --addons=metallb \
-    --addons=metrics-server \
-    --mount=true \
-    --mount-string="$HOST_PATH:/host-data"
+microk8s kubectl apply -f config.yaml
+microk8s kubectl apply -f metallb.yaml
+microk8s kubectl apply -f psql.yaml
+microk8s kubectl apply -f redis.yaml
+microk8s kubectl apply -f backend.yaml
 
-check_minikube_ip
+microk8s kubectl wait --for=condition=ready --timeout=5m pod -l app=postgres
+microk8s kubectl wait --for=condition=ready pod -l app=redis
+microk8s kubectl wait --for=condition=ready pod -l app=backend
 
-minikube image load node-server:2
-
-kubectl apply -f metallb.yaml
-kubectl apply -f psql.yaml
-kubectl apply -f redis.yaml
-kubectl apply -f backend.yaml
-
-kubectl wait --for=condition=ready --timeout=60s pod -l app=postgres
-kubectl wait --for=condition=ready --timeout=60s pod -l app=redis
-kubectl wait --for=condition=ready --timeout=60s pod -l app=backend
+sleep 3
 
 curl http://192.168.49.100:4000/redis
 curl http://192.168.49.100:4000/psql
-
-# kubectl get hpa -w
-# ab -n 1000000 -c 500 http://192.168.49.100:4000/redis

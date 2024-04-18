@@ -2,6 +2,7 @@ const express = require('express');
 const redis = require('redis');
 const { Client } = require('pg');
 const { MongoClient } = require('mongodb');
+const fs = require('fs');
 
 const app = express();
 const port = 3000;
@@ -63,4 +64,10 @@ app.get('/mongo', async (req, res) => {
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
+});
+
+fs.writeFile('/storage/logs.txt', 'Hello', (err) => {
+    if (err) {
+        console.error('파일 쓰기 오류:', err);
+    }
 });

@@ -7,7 +7,7 @@ clear
 sudo mkdir -p /microk8s/volume
 sudo chmod -R 777 /microk8s/volume
 
-microk8s kubectl delete all --all
+microk8s kubectl delete all --all --force=true
 
 docker build -t node-server:2 ./server
 docker save node-server:2 -o node-server.tar

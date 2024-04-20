@@ -55,7 +55,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: backend-pv-claim
 spec:
-  storageClassName: ssd-hostpath
+  storageClassName: nfs-csi
   accessModes:
     - ReadWriteOnce
   resources:

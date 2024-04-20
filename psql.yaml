@@ -81,7 +81,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: psql-pv-claim
 spec:
-  storageClassName: ssd-hostpath
+  storageClassName: nfs-csi
   accessModes:
     - ReadWriteOnce
   resources:

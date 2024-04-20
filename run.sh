@@ -35,6 +35,5 @@ sleep 3
 
 curl http://192.168.10.19:4000/redis
 curl http://192.168.10.19:4000/psql
-curl http://192.168.10.19:5000
-
-microk8s kubectl port-forward service/backend-service 4000:4010
+curl http://192.168.10.19:30000
+curl http://192.168.10.19

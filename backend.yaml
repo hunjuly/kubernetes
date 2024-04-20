@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: backend-container
-          image: node-server:2
+          image: backend:1
           ports:
             - containerPort: 3000
           envFrom:
@@ -56,7 +56,7 @@ metadata:
 spec:
   storageClassName: nfs-csi
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: 100Gi
@@ -65,6 +65,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: backend-service
+  annotations:
+    # MetalLB에서 ip를 공유하도록 함
+    metallb.universe.tf/allow-shared-ip: "key-to-share-1.2.3.4"
 spec:
   type: LoadBalancer
   selector:

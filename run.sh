@@ -4,7 +4,11 @@ cd "$(dirname "$0")"
 
 clear
 
-microk8s kubectl delete all --all --force=true
+microk8s kubectl delete all --all=true --force=true
+microk8s kubectl delete secret --all=true --force=true
+
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout key.pem -out cert.pem -subj "/C=US/ST=State/L=City/O=Organization/OU=Department/CN=example.com"
+microk8s kubectl create secret tls secret-tls --key key.pem --cert cert.pem
 
 docker build -t frontend:1 ./frontend
 docker save frontend:1 -o frontend.tar
@@ -35,5 +39,4 @@ sleep 3
 
 curl http://192.168.10.19:4000/redis
 curl http://192.168.10.19:4000/psql
-curl http://192.168.10.19:30000
-curl http://192.168.10.19
+curl -k https://example.com

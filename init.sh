@@ -16,3 +16,5 @@ microk8s helm3 install csi-driver-nfs csi-driver-nfs/csi-driver-nfs \
     --set kubeletDir=/var/snap/microk8s/common/var/lib/kubelet
 microk8s kubectl wait pod --selector app.kubernetes.io/name=csi-driver-nfs --for condition=ready --namespace kube-system
 microk8s enable ingress
+
+microk8s add-node -t abcdef1234567890abcdef1234567890

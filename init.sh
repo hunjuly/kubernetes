@@ -19,3 +19,18 @@ microk8s kubectl wait pod --selector app.kubernetes.io/name=csi-driver-nfs --for
 microk8s enable ingress
 
 microk8s add-node -t abcdef1234567890abcdef1234567890
+
+
+# docker run -d --name nfs-server --privileged \
+#     --network=host \
+#     -v $HOST_PATH/nfs:/nfsshare \
+#     -e SHARED_DIRECTORY=/nfsshare \
+#     itsthenetwork/nfs-server-alpine:latest
+
+# mkdir /mnt/nfs
+# mount -t nfs nfs-server:/nfsshare /mnt/nfs
+
+# docker run -it --rm --privileged --name nfs-client \
+#     --network=host \
+#     -v $HOME_PATH/client:/mnt/nfs \
+#     alpine:latest sh

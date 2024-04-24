@@ -4,36 +4,40 @@ cd "$(dirname "$0")"
 
 clear
 
-microk8s kubectl delete all --all=true --force=true
-microk8s kubectl delete secret --all=true --force=true
+minikube delete --all
+minikube start --force \
+    --cpus=no-limit \
+    --memory=no-limit \
+    --disk-size='20000g' \
+    --nodes 1 \
+    --addons=ingress \
+    --addons=metallb \
+    --addons=metrics-server
 
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout key.pem -out cert.pem -subj "/C=US/ST=State/L=City/O=Organization/OU=Department/CN=example.com"
-microk8s kubectl create secret tls secret-tls --key key.pem --cert cert.pem
+kubectl create secret tls secret-tls --key key.pem --cert cert.pem
+rm key.pem cert.pem
 
 docker build -t frontend:1 ./frontend
-docker save frontend:1 -o frontend.tar
-microk8s images import < frontend.tar
-rm frontend.tar
+minikube image load frontend:1
 
 docker build -t backend:1 ./backend
-docker save backend:1 -o backend.tar
-microk8s images import < backend.tar
-rm backend.tar
+minikube image load backend:1
 
-microk8s kubectl apply -f config.yaml
-microk8s kubectl apply -f metallb.yaml
+kubectl apply -f config.yaml
+kubectl apply -f metallb.yaml
 
-microk8s kubectl apply -f psql.yaml
-microk8s kubectl wait --for=condition=ready --timeout=5m pod -l app=postgres
+kubectl apply -f psql.yaml
+kubectl wait --for=condition=ready --timeout=5m pod -l app=postgres
 
-microk8s kubectl apply -f redis.yaml
-microk8s kubectl wait --for=condition=ready pod -l app=redis
+kubectl apply -f redis.yaml
+kubectl wait --for=condition=ready pod -l app=redis
 
-microk8s kubectl apply -f backend.yaml
-microk8s kubectl wait --for=condition=ready pod -l app=backend
+kubectl apply -f backend.yaml
+kubectl wait --for=condition=ready pod -l app=backend
 
-microk8s kubectl apply -f frontend.yaml
-microk8s kubectl wait --for=condition=ready pod -l app=frontend
+kubectl apply -f frontend.yaml
+kubectl wait --for=condition=ready pod -l app=frontend
 
 sleep 3
 

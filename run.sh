@@ -14,6 +14,9 @@ minikube start --force \
     --addons=metallb \
     --addons=metrics-server
 
+# nfs csi 설치
+curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/v4.6.0/deploy/install-driver.sh | bash -s v4.6.0 --
+
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout key.pem -out cert.pem -subj "/C=US/ST=State/L=City/O=Organization/OU=Department/CN=example.com"
 kubectl create secret tls secret-tls --key key.pem --cert cert.pem
 rm key.pem cert.pem
@@ -41,6 +44,6 @@ kubectl wait --for=condition=ready pod -l app=frontend
 
 sleep 3
 
-curl http://192.168.10.19:4000/redis
-curl http://192.168.10.19:4000/psql
+curl http://192.168.49.100:4000/redis
+curl http://192.168.49.100:4000/psql
 curl -k https://example.com

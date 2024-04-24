@@ -12,12 +12,12 @@ microk8s kubectl create secret tls secret-tls --key key.pem --cert cert.pem
 
 docker build -t frontend:1 ./frontend
 docker save frontend:1 -o frontend.tar
-sudo microk8s images import < frontend.tar
+microk8s images import < frontend.tar
 rm frontend.tar
 
 docker build -t backend:1 ./backend
 docker save backend:1 -o backend.tar
-sudo microk8s images import < backend.tar
+microk8s images import < backend.tar
 rm backend.tar
 
 microk8s kubectl apply -f config.yaml

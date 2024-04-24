@@ -1,7 +1,8 @@
 #!/bin/bash
 
-sudo snap install microk8s --classic
-sudo microk8s reset --destroy-storage
+apt install -y snapd
+snap install microk8s --classic
+microk8s reset --destroy-storage
 
 microk8s enable dashboard
 microk8s enable dns
